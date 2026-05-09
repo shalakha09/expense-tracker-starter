@@ -15,8 +15,17 @@ There is no test runner configured.
 
 This is the starter project for the [Code with Mosh "Claude Code" course](https://codewithmosh.com/p/claude-code). Per the README, it **intentionally ships with a bug, poor UI, and messy code** that are meant to be fixed throughout the course — keep that in mind before "cleaning up" code unprompted.
 
-The whole app is a single React 19 component (`src/App.jsx`) bootstrapped by `src/main.jsx` via Vite. State, derived totals, the add-transaction form, and the filtered transactions table all live in that one file. There is no router, no backend, and no persistence — transactions reset on reload because they're held in `useState` seeded with hard-coded data.
+A React 19 app bootstrapped by `src/main.jsx` via Vite. There is no router, no backend, and no persistence — transactions reset on reload because they're held in `useState` seeded with hard-coded data.
 
-### Known intentional bug
+### Component structure
 
-`transactions[].amount` is stored as a **string** (both in the seed data and from the form's `<input type="number">`, whose `e.target.value` is a string). The income/expense reducers do `sum + t.amount`, which string-concatenates rather than sums. Any fix should coerce to a number at the boundary (form submission and/or the reducer) rather than just patching one site.
+- `src/App.jsx` — owns the canonical `transactions` list and the shared `categories` array, exposes an `addTransaction` handler, and composes the three child components below.
+- `src/Summary.jsx` — receives `transactions`, computes income/expense/balance internally, and renders the summary cards.
+- `src/TransactionForm.jsx` — owns its own form input state (description, amount, type, category). Receives `categories` and an `onAdd` callback; on submit it constructs the new transaction (coercing `amount` to `Number`) and hands it to `onAdd`.
+- `src/TransactionList.jsx` — owns its own filter state (`filterType`, `filterCategory`). Receives `transactions` and `categories`, applies filters locally, and renders the table.
+
+State lives as close to where it's used as possible: form-input state inside `TransactionForm`, filter state inside `TransactionList`. Only the canonical `transactions` list is lifted to `App`.
+
+### Resolved intentional bug
+
+The starter originally stored `transactions[].amount` as a string, causing the income/expense reducers (`sum + t.amount`) to string-concatenate. This is fixed: seed data uses numeric amounts, and `TransactionForm` coerces the form input via `Number(amount)` before calling `onAdd`. If you add a new entry point that creates transactions, coerce `amount` to a number there too.
