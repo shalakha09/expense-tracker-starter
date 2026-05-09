@@ -19,10 +19,10 @@ A React 19 app bootstrapped by `src/main.jsx` via Vite. There is no router, no b
 
 ### Component structure
 
-- `src/App.jsx` — owns the canonical `transactions` list and the shared `categories` array, exposes an `addTransaction` handler, and composes the three child components below.
+- `src/App.jsx` — owns the canonical `transactions` list and the shared `categories` array, exposes `addTransaction` and `deleteTransaction` handlers, and composes the three child components below.
 - `src/Summary.jsx` — receives `transactions`, computes income/expense/balance internally, and renders the summary cards.
 - `src/TransactionForm.jsx` — owns its own form input state (description, amount, type, category). Receives `categories` and an `onAdd` callback; on submit it constructs the new transaction (coercing `amount` to `Number`) and hands it to `onAdd`.
-- `src/TransactionList.jsx` — owns its own filter state (`filterType`, `filterCategory`). Receives `transactions` and `categories`, applies filters locally, and renders the table.
+- `src/TransactionList.jsx` — owns its own filter state (`filterType`, `filterCategory`). Receives `transactions`, `categories`, and an `onDelete(id)` callback; applies filters locally, renders the table, and gates per-row deletes behind a `window.confirm` prompt before invoking `onDelete`.
 
 State lives as close to where it's used as possible: form-input state inside `TransactionForm`, filter state inside `TransactionList`. Only the canonical `transactions` list is lifted to `App`.
 
